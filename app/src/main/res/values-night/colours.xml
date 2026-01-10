@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Brand / primary -->
+    <color name="primary">#0095F6</color>
+    <color name="primary_dark">#0081D9</color>
+
+    <!-- Surfaces -->
+    <color name="background">#000000</color>
+    <color name="surface">#121212</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#A8A8A8</color>
+
+    <!-- UI elements -->
+    <color name="border">#262626</color>
+    <color name="divider">#262626</color>
+
+    <!-- Status / error -->
+    <color name="error">#ED4956</color>
+
+</resources>
