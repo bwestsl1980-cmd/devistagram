@@ -126,8 +126,54 @@ class OAuthManager(private val context: Context) {
     
     fun isLoggedIn(): Boolean = tokenManager.isLoggedIn()
     
-    fun logout() {
-        tokenManager.clearTokens()
-        pendingState = null
+    suspend fun logout(): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            // Get the access token before clearing
+            val accessToken = tokenManager.getAccessToken()
+            
+            // Revoke the token with DeviantArt
+            if (accessToken != null) {
+                try {
+                    val response = RetrofitClient.authApi.revokeToken(accessToken)
+                    if (response.isSuccessful) {
+                        android.util.Log.d("OAuthManager", "Token revoked successfully: ${response.body()}")
+                    } else {
+                        android.util.Log.e("OAuthManager", "Failed to revoke token: ${response.code()} - ${response.message()}")
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("OAuthManager", "Exception revoking token", e)
+                }
+            }
+            
+            // Clear local tokens
+            tokenManager.clearTokens()
+            pendingState = null
+            
+            // Clear CustomTabs session data
+            clearCustomTabsCache()
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    private fun clearCustomTabsCache() {
+        try {
+            // Clear WebView cookies and cache
+            android.webkit.CookieManager.getInstance().apply {
+                removeAllCookies(null)
+                flush()
+            }
+            
+            android.webkit.WebStorage.getInstance().deleteAllData()
+            
+            // Clear app cache
+            context.cacheDir.deleteRecursively()
+            
+            android.util.Log.d("OAuthManager", "CustomTabs cache cleared")
+        } catch (e: Exception) {
+            android.util.Log.e("OAuthManager", "Failed to clear cache", e)
+        }
     }
 }

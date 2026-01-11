@@ -47,7 +47,11 @@ class TokenManager(context: Context) {
     }
     
     fun clearTokens() {
+        android.util.Log.d("TokenManager", "CLEARING TOKENS - Before clear")
+        android.util.Log.d("TokenManager", "Access token before clear: ${getAccessToken()}")
         sharedPreferences.edit().clear().apply()
+        android.util.Log.d("TokenManager", "CLEARING TOKENS - After clear")
+        android.util.Log.d("TokenManager", "Access token after clear: ${getAccessToken()}")
     }
     
     companion object {

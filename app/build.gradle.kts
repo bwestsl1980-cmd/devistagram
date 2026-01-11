@@ -68,6 +68,12 @@ dependencies {
     // Image loading
     implementation("io.coil-kt:coil:2.5.0")
     
+    // Image zoom (PhotoView)
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    
+    // HTML parsing for web scraping
+    implementation("org.jsoup:jsoup:1.17.2")
+    
     // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")

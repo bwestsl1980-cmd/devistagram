@@ -11,7 +11,7 @@
         <item name="colorError">@color/error</item>
 
         <!-- Status bar -->
-        <item name="android:statusBarColor">#0095F6</item>
+        <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowLightStatusBar">false</item>
 
         <!-- Navigation bar -->

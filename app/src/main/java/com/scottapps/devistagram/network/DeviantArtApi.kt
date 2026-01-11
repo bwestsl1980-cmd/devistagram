@@ -68,4 +68,56 @@ interface DeviantArtApi {
     suspend fun getCurrentUser(
         @Header("Authorization") authorization: String
     ): Response<com.scottapps.devistagram.model.UserProfile>
+
+    @GET("gallery/folders")
+    suspend fun getGalleryFolders(
+        @Header("Authorization") authorization: String,
+        @Query("username") username: String,
+        @Query("calculate_size") calculateSize: Boolean = true,
+        @Query("offset") offset: Int? = null,
+        @Query("limit") limit: Int = 50
+    ): Response<com.scottapps.devistagram.model.GalleryFoldersResponse>
+
+    @GET("gallery/{folderid}")
+    suspend fun getGalleryFolder(
+        @retrofit2.http.Path("folderid") folderId: String,
+        @Header("Authorization") authorization: String,
+        @Query("username") username: String,
+        @Query("offset") offset: Int? = null,
+        @Query("limit") limit: Int = 24,
+        @Query("mature_content") matureContent: Boolean = true
+    ): Response<DailyDeviationsResponse>
+
+    @GET("collections/folders")
+    suspend fun getCollectionFolders(
+        @Header("Authorization") authorization: String,
+        @Query("username") username: String,
+        @Query("offset") offset: Int? = null,
+        @Query("limit") limit: Int = 50
+    ): Response<com.scottapps.devistagram.model.GalleryFoldersResponse>
+
+    @GET("collections/{folderid}")
+    suspend fun getCollectionFolder(
+        @retrofit2.http.Path("folderid") folderId: String,
+        @Header("Authorization") authorization: String,
+        @Query("username") username: String,
+        @Query("offset") offset: Int? = null,
+        @Query("limit") limit: Int = 24,
+        @Query("mature_content") matureContent: Boolean = true
+    ): Response<DailyDeviationsResponse>
+
+    @GET("collections/all")
+    suspend fun getAllCollections(
+        @Header("Authorization") authorization: String,
+        @Query("username") username: String,
+        @Query("offset") offset: Int? = null,
+        @Query("limit") limit: Int = 24,
+        @Query("mature_content") matureContent: Boolean = true
+    ): Response<DailyDeviationsResponse>
+
+    @GET("deviation/{deviationid}")
+    suspend fun getDeviation(
+        @retrofit2.http.Path("deviationid") deviationId: String,
+        @Header("Authorization") authorization: String
+    ): Response<com.scottapps.devistagram.model.DeviationDetailResponse>
 }

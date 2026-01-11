@@ -28,17 +28,50 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@id/authorAvatarImageView"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/favoriteButton"
             app:layout_constraintStart_toEndOf="@id/authorAvatarImageView"
             app:layout_constraintTop_toTopOf="@id/authorAvatarImageView"
             tools:text="ArtistName" />
+
+        <!-- Filter Icons (Same row as author name) -->
+        <TextView
+            android:id="@+id/favoriteButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="⭐"
+            android:textSize="20sp"
+            android:contentDescription="Favorite artist"
+            app:layout_constraintBottom_toBottomOf="@id/authorAvatarImageView"
+            app:layout_constraintEnd_toStartOf="@id/blockButton"
+            app:layout_constraintTop_toTopOf="@id/authorAvatarImageView" />
+
+        <TextView
+            android:id="@+id/blockButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="🚫"
+            android:textSize="20sp"
+            android:contentDescription="Block artist"
+            app:layout_constraintBottom_toBottomOf="@id/authorAvatarImageView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/authorAvatarImageView" />
 
         <!-- Deviation Image -->
         <ImageView

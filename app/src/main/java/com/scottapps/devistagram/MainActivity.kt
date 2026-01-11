@@ -29,6 +29,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Restore saved theme preference
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val nightMode = prefs.getInt("night_mode", androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(nightMode)
+
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -54,9 +59,12 @@ class MainActivity : AppCompatActivity() {
         setupBottomNavigation()
         setupNotificationBadge()
 
-        // Load initial fragment (Discover)
+        // Load initial fragment
         if (savedInstanceState == null) {
-            loadFragment(DiscoverFragment())
+            // Check if there's a saved tab selection
+            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            val savedTab = prefs.getInt("selected_tab", R.id.navigation_feed)
+            binding.bottomNavigation.selectedItemId = savedTab
         }
     }
 
@@ -70,12 +78,18 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_profile -> ProfileFragment()
                 else -> return@setOnItemSelectedListener false
             }
+            
+            // Save the selected tab
+            getSharedPreferences("app_prefs", MODE_PRIVATE)
+                .edit()
+                .putInt("selected_tab", item.itemId)
+                .apply()
+            
             loadFragment(fragment)
             true
         }
 
-        // Set Discover as selected by default
-        binding.bottomNavigation.selectedItemId = R.id.navigation_discover
+        // Don't set default here - it's handled in onCreate
     }
 
     private fun loadFragment(fragment: Fragment) {

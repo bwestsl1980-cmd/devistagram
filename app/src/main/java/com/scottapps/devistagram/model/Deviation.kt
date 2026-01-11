@@ -57,7 +57,13 @@ data class Deviation(
     val isDeleted: Boolean,
     
     @SerializedName("is_mature")
-    val isMature: Boolean = false
+    val isMature: Boolean = false,
+    
+    @SerializedName("excerpt")
+    val excerpt: String?,
+    
+    @SerializedName("description")
+    val description: String?
 )
 
 data class Author(
@@ -79,7 +85,10 @@ data class Stats(
     val comments: Int,
     
     @SerializedName("favourites")
-    val favourites: Int
+    val favourites: Int,
+    
+    @SerializedName("views")
+    val views: Int?
 )
 
 data class Preview(

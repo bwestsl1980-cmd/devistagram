@@ -26,4 +26,10 @@ interface DeviantArtAuthApi {
         @Field("client_secret") clientSecret: String,
         @Field("refresh_token") refreshToken: String
     ): Response<TokenResponse>
+    
+    @FormUrlEncoded
+    @POST("revoke")
+    suspend fun revokeToken(
+        @Field("token") token: String
+    ): Response<Map<String, Boolean>>
 }

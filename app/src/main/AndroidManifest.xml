@@ -40,6 +40,12 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
+        <!-- Deviation Detail Activity -->
+        <activity
+            android:name=".DeviationDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Devistagram" />
     </application>
 
 </manifest>
