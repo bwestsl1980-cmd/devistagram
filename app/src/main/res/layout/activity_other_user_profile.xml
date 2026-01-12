@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Top App Bar (no menu) -->
+    <!-- Top App Bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -19,7 +19,21 @@
         app:titleTextColor="@color/text_primary"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:navigationIconTint="@color/text_primary"
-        android:theme="@style/ThemeOverlay.Material3.Dark" />
+        android:theme="@style/ThemeOverlay.Material3.Dark">
+
+        <!-- Favorite Star Icon -->
+        <ImageButton
+            android:id="@+id/favoriteButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Add to favorites"
+            android:padding="12dp"
+            android:src="@drawable/ic_star_border" />
+
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <ScrollView
         android:layout_width="0dp"

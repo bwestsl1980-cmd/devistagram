@@ -16,9 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
+import com.bethwestsl.devistagram.DeviationDetailActivity
+import com.bethwestsl.devistagram.OtherUserProfileActivity
 import com.bethwestsl.devistagram.R
 import com.bethwestsl.devistagram.databinding.FragmentMentionsNotificationsBinding
 import com.bethwestsl.devistagram.databinding.ItemMentionNotificationBinding
+import com.bethwestsl.devistagram.model.Author
+import com.bethwestsl.devistagram.model.Deviation
 import com.bethwestsl.devistagram.model.Message
 import com.bethwestsl.devistagram.viewmodel.MentionsNotificationsViewModel
 import java.text.SimpleDateFormat
@@ -180,8 +184,10 @@ class MentionsNotificationsFragment : Fragment() {
                     spannableString.setSpan(
                         object : ClickableSpan() {
                             override fun onClick(widget: View) {
-                                // TODO: Navigate to user profile
-                                Toast.makeText(widget.context, "Navigate to $username's profile", Toast.LENGTH_SHORT).show()
+                                // Navigate to user profile
+                                message.originator?.username?.let { user ->
+                                    OtherUserProfileActivity.start(widget.context, user)
+                                }
                             }
 
                             override fun updateDrawState(ds: android.text.TextPaint) {
@@ -202,8 +208,10 @@ class MentionsNotificationsFragment : Fragment() {
                         spannableString.setSpan(
                             object : ClickableSpan() {
                                 override fun onClick(widget: View) {
-                                    // TODO: Navigate to the mention (comment/deviation)
-                                    Toast.makeText(widget.context, "Navigate to mention: $title", Toast.LENGTH_SHORT).show()
+                                    // Navigate to the deviation containing the mention
+                                    message.subject?.deviation?.deviationId?.let { deviationId ->
+                                        navigateToDeviation(deviationId)
+                                    }
                                 }
 
                                 override fun updateDrawState(ds: android.text.TextPaint) {
@@ -242,6 +250,35 @@ class MentionsNotificationsFragment : Fragment() {
                 } catch (_: Exception) {
                     timestamp
                 }
+            }
+
+            private fun navigateToDeviation(deviationId: String) {
+                // Create a minimal Deviation object for navigation
+                val deviation = Deviation(
+                    deviationId = deviationId,
+                    title = "",
+                    url = "",
+                    publishedTime = null,
+                    author = Author(
+                        userId = "",
+                        username = "",
+                        userIcon = "",
+                        type = ""
+                    ),
+                    stats = null,
+                    preview = null,
+                    content = null,
+                    thumbs = null,
+                    excerpt = null,
+                    isFavourited = false,
+                    isMature = false,
+                    allowsComments = false,
+                    category = null,
+                    categoryPath = null,
+                    isDeleted = false,
+                    description = null
+                )
+                DeviationDetailActivity.start(binding.root.context, deviation)
             }
         }
     }

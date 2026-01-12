@@ -16,7 +16,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
+import com.bethwestsl.devistagram.CollectionDetailActivity
 import com.bethwestsl.devistagram.DeviationDetailActivity
+import com.bethwestsl.devistagram.OtherUserProfileActivity
 import com.bethwestsl.devistagram.R
 import com.bethwestsl.devistagram.databinding.FragmentFeedbackNotificationsBinding
 import com.bethwestsl.devistagram.databinding.ItemFeedbackNotificationBinding
@@ -132,7 +134,10 @@ class FeedbackNotificationsFragment : Fragment() {
         private var notifications = listOf<Message>()
 
         fun submitList(newNotifications: List<Message>) {
-            notifications = newNotifications
+            // Filter out journal/text entries (those with deviation.text_content.excerpt)
+            notifications = newNotifications.filter { message ->
+                message.subject?.deviation?.textContent?.excerpt == null
+            }
             notifyDataSetChanged()
         }
 
@@ -170,63 +175,24 @@ class FeedbackNotificationsFragment : Fragment() {
                     // New indicator
                     newIndicator.visibility = if (message.isNew) View.VISIBLE else View.GONE
 
-                    // Deviation thumbnail
-                    val thumbnailUrl = message.subject?.deviation?.thumbs?.firstOrNull()?.src
-                    if (thumbnailUrl != null) {
-                        deviationThumbnail.visibility = View.VISIBLE
-                        deviationThumbnail.load(thumbnailUrl) {
-                            crossfade(true)
-                            placeholder(android.R.drawable.ic_menu_gallery)
-                            error(android.R.drawable.ic_menu_gallery)
-                        }
-                    } else {
-                        deviationThumbnail.visibility = View.GONE
-                    }
-
-                    // Notification text with clickable links
                     val username = message.originator?.username ?: "Someone"
-                    val deviationTitle = message.subject?.deviation?.title ?: "artwork"
 
-                    // If collection block doesn't exist, it means added to favorites (not a specific folder)
-                    val collectionName = if (message.collection == null) {
-                        "Favourites"
-                    } else {
-                        message.collection.name ?: "a collection"
-                    }
+                    // Check message type to determine how to display
+                    if (message.type == "feedback.watch") {
+                        // Handle watch notification
+                        deviationThumbnail.visibility = View.GONE
 
-                    val fullText = "$username has added $deviationTitle to their folder $collectionName"
-                    val spannableString = SpannableString(fullText)
+                        val fullText = "$username is now watching you"
+                        val spannableString = SpannableString(fullText)
 
-                    // Make username clickable
-                    val usernameStart = 0
-                    val usernameEnd = username.length
-                    spannableString.setSpan(
-                        object : ClickableSpan() {
-                            override fun onClick(widget: View) {
-                                // TODO: Navigate to user profile
-                                Toast.makeText(widget.context, "Navigate to $username's profile", Toast.LENGTH_SHORT).show()
-                            }
-
-                            override fun updateDrawState(ds: android.text.TextPaint) {
-                                super.updateDrawState(ds)
-                                ds.color = ContextCompat.getColor(root.context, R.color.link_color)
-                                ds.isUnderlineText = false
-                            }
-                        },
-                        usernameStart,
-                        usernameEnd,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-
-                    // Make deviation title clickable
-                    val deviationStart = fullText.indexOf(deviationTitle)
-                    val deviationEnd = deviationStart + deviationTitle.length
-                    if (deviationStart >= 0) {
+                        // Make username clickable
+                        val usernameStart = 0
+                        val usernameEnd = username.length
                         spannableString.setSpan(
                             object : ClickableSpan() {
                                 override fun onClick(widget: View) {
-                                    message.subject?.deviation?.deviationId?.let { deviationId ->
-                                        navigateToDeviation(deviationId)
+                                    message.originator?.username?.let { user ->
+                                        OtherUserProfileActivity.start(widget.context, user)
                                     }
                                 }
 
@@ -236,21 +202,50 @@ class FeedbackNotificationsFragment : Fragment() {
                                     ds.isUnderlineText = false
                                 }
                             },
-                            deviationStart,
-                            deviationEnd,
+                            usernameStart,
+                            usernameEnd,
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
-                    }
 
-                    // Make collection name clickable (if it exists and is not "Favourites")
-                    val collectionStart = fullText.indexOf(collectionName)
-                    val collectionEnd = collectionStart + collectionName.length
-                    if (collectionStart >= 0 && message.collection != null) {
+                        notificationTextView.text = spannableString
+                        notificationTextView.movementMethod = LinkMovementMethod.getInstance()
+                    } else {
+                        // Handle favorite notification (existing code)
+                        // Deviation thumbnail
+                        val thumbnailUrl = message.subject?.deviation?.thumbs?.firstOrNull()?.src
+                        if (thumbnailUrl != null) {
+                            deviationThumbnail.visibility = View.VISIBLE
+                            deviationThumbnail.load(thumbnailUrl) {
+                                crossfade(true)
+                                placeholder(android.R.drawable.ic_menu_gallery)
+                                error(android.R.drawable.ic_menu_gallery)
+                            }
+                        } else {
+                            deviationThumbnail.visibility = View.GONE
+                        }
+
+                        val deviationTitle = message.subject?.deviation?.title ?: "artwork"
+
+                        // If collection block doesn't exist, it means added to favorites (not a specific folder)
+                        val collectionName = if (message.collection == null) {
+                            "Favourites"
+                        } else {
+                            message.collection.name ?: "a collection"
+                        }
+
+                        val fullText = "$username has added $deviationTitle to their folder $collectionName"
+                        val spannableString = SpannableString(fullText)
+
+                        // Make username clickable
+                        val usernameStart = 0
+                        val usernameEnd = username.length
                         spannableString.setSpan(
                             object : ClickableSpan() {
                                 override fun onClick(widget: View) {
-                                    // TODO: Navigate to collection folder
-                                    Toast.makeText(widget.context, "Navigate to collection: ${message.collection.name}", Toast.LENGTH_SHORT).show()
+                                    // Navigate to user profile
+                                    message.originator?.username?.let { user ->
+                                        OtherUserProfileActivity.start(widget.context, user)
+                                    }
                                 }
 
                                 override fun updateDrawState(ds: android.text.TextPaint) {
@@ -259,14 +254,72 @@ class FeedbackNotificationsFragment : Fragment() {
                                     ds.isUnderlineText = false
                                 }
                             },
-                            collectionStart,
-                            collectionEnd,
+                            usernameStart,
+                            usernameEnd,
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
-                    }
 
-                    notificationTextView.text = spannableString
-                    notificationTextView.movementMethod = LinkMovementMethod.getInstance()
+                        // Make deviation title clickable
+                        val deviationStart = fullText.indexOf(deviationTitle)
+                        val deviationEnd = deviationStart + deviationTitle.length
+                        if (deviationStart >= 0) {
+                            spannableString.setSpan(
+                                object : ClickableSpan() {
+                                    override fun onClick(widget: View) {
+                                        message.subject?.deviation?.deviationId?.let { deviationId ->
+                                            navigateToDeviation(deviationId)
+                                        }
+                                    }
+
+                                    override fun updateDrawState(ds: android.text.TextPaint) {
+                                        super.updateDrawState(ds)
+                                        ds.color = ContextCompat.getColor(root.context, R.color.link_color)
+                                        ds.isUnderlineText = false
+                                    }
+                                },
+                                deviationStart,
+                                deviationEnd,
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        }
+
+                        // Make collection name clickable (if it exists and has folderId)
+                        val collectionStart = fullText.indexOf(collectionName)
+                        val collectionEnd = collectionStart + collectionName.length
+                        if (collectionStart >= 0 && message.collection?.folderId != null) {
+                            spannableString.setSpan(
+                                object : ClickableSpan() {
+                                    override fun onClick(widget: View) {
+                                        // Navigate to collection folder
+                                        val username = message.originator?.username
+                                        val folderId = message.collection?.folderId
+                                        val collectionName = message.collection?.name
+
+                                        if (username != null && folderId != null) {
+                                            CollectionDetailActivity.start(
+                                                widget.context,
+                                                username,
+                                                folderId,
+                                                collectionName
+                                            )
+                                        }
+                                    }
+
+                                    override fun updateDrawState(ds: android.text.TextPaint) {
+                                        super.updateDrawState(ds)
+                                        ds.color = ContextCompat.getColor(root.context, R.color.link_color)
+                                        ds.isUnderlineText = false
+                                    }
+                                },
+                                collectionStart,
+                                collectionEnd,
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        }
+
+                        notificationTextView.text = spannableString
+                        notificationTextView.movementMethod = LinkMovementMethod.getInstance()
+                    }
 
                     // Timestamp
                     timestampTextView.text = formatTimestamp(message.timestamp)

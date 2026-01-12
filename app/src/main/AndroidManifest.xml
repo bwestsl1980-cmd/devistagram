@@ -53,6 +53,12 @@
             android:exported="false"
             android:theme="@style/Theme.Devistagram" />
 
+        <!-- Collection Detail Activity -->
+        <activity
+            android:name=".CollectionDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Devistagram" />
+
         <!-- Notes Activity -->
         <activity
             android:name=".NotesActivity"

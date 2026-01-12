@@ -17,6 +17,7 @@ import coil.transform.CircleCropTransformation
 import com.bethwestsl.devistagram.adapter.DeviationGridAdapter
 import com.bethwestsl.devistagram.databinding.ActivityOtherUserProfileBinding
 import com.bethwestsl.devistagram.model.GalleryFolder
+import com.bethwestsl.devistagram.util.ArtistFilterManager
 import com.bethwestsl.devistagram.viewmodel.OtherUserProfileViewModel
 import com.bethwestsl.devistagram.viewmodel.OtherUserProfileViewModelFactory
 
@@ -25,6 +26,7 @@ class OtherUserProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOtherUserProfileBinding
     private lateinit var viewModel: OtherUserProfileViewModel
     private lateinit var deviationsAdapter: DeviationGridAdapter
+    private lateinit var filterManager: ArtistFilterManager
     private var galleryFolders: List<GalleryFolder> = emptyList()
     private var collectionFolders: List<GalleryFolder> = emptyList()
     private var currentUsername: String? = null
@@ -56,6 +58,7 @@ class OtherUserProfileActivity : AppCompatActivity() {
         }
 
         currentUsername = username
+        filterManager = ArtistFilterManager(this)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -71,6 +74,7 @@ class OtherUserProfileActivity : AppCompatActivity() {
         setupViewModel(username)
         setupTabs()
         setupWatchButton()
+        setupFavoriteButton()
     }
 
     private fun setupToolbar() {
@@ -200,12 +204,49 @@ class OtherUserProfileActivity : AppCompatActivity() {
         // Observe watch status
         viewModel.isWatching.observe(this) { isWatching ->
             updateWatchButton(isWatching)
+
+            // Show favorite button only if watching this user
+            if (isWatching) {
+                binding.favoriteButton.visibility = View.VISIBLE
+                currentUsername?.let { username ->
+                    updateFavoriteButton(filterManager.isFavorite(username))
+                }
+            } else {
+                binding.favoriteButton.visibility = View.GONE
+            }
         }
     }
 
     private fun setupWatchButton() {
         binding.watchButton.setOnClickListener {
             viewModel.toggleWatch()
+        }
+    }
+
+    private fun setupFavoriteButton() {
+        // Initially hide the favorite button (will be shown if user is watching)
+        binding.favoriteButton.visibility = View.GONE
+
+        binding.favoriteButton.setOnClickListener {
+            currentUsername?.let { username ->
+                val added = filterManager.toggleFavorite(username)
+                updateFavoriteButton(added)
+
+                val message = if (added) {
+                    "Added $username to favorites"
+                } else {
+                    "Removed $username from favorites"
+                }
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun updateFavoriteButton(isFavorite: Boolean) {
+        if (isFavorite) {
+            binding.favoriteButton.setImageResource(R.drawable.ic_star)
+        } else {
+            binding.favoriteButton.setImageResource(R.drawable.ic_star_border)
         }
     }
 

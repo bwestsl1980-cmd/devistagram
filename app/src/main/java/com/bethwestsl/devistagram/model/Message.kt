@@ -91,5 +91,13 @@ data class MessageDeviation(
     val url: String?,
 
     @SerializedName("thumbs")
-    val thumbs: List<Preview>?
+    val thumbs: List<Preview>?,
+
+    @SerializedName("text_content")
+    val textContent: MessageTextContent?
+)
+
+data class MessageTextContent(
+    @SerializedName("excerpt")
+    val excerpt: String?
 )

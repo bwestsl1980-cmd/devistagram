@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.bethwestsl.devistagram.DeviationDetailActivity
+import com.bethwestsl.devistagram.OtherUserProfileActivity
 import com.bethwestsl.devistagram.R
 import com.bethwestsl.devistagram.databinding.FragmentCommentsNotificationsBinding
 import com.bethwestsl.devistagram.databinding.ItemCommentNotificationBinding
@@ -225,13 +226,19 @@ class CommentsNotificationsFragment : Fragment() {
                                 override fun onClick(widget: View) {
                                     when (range.type) {
                                         ClickType.USER -> {
-                                            Toast.makeText(widget.context, "Navigate to ${range.data}'s profile", Toast.LENGTH_SHORT).show()
+                                            // Navigate to user profile
+                                            message.originator?.username?.let { user ->
+                                                OtherUserProfileActivity.start(widget.context, user)
+                                            }
                                         }
                                         ClickType.DEVIATION -> {
                                             navigateToDeviation(range.data)
                                         }
                                         ClickType.COMMENT -> {
-                                            Toast.makeText(widget.context, "Navigate to comment ${range.data}", Toast.LENGTH_SHORT).show()
+                                            // Navigate to the deviation containing the comment
+                                            message.subject?.deviation?.deviationId?.let { deviationId ->
+                                                navigateToDeviation(deviationId)
+                                            }
                                         }
                                     }
                                 }

@@ -9,20 +9,18 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bethwestsl.devistagram.DeviationDetailActivity
-import com.bethwestsl.devistagram.R
 import com.bethwestsl.devistagram.adapter.DeviationGridAdapter
 import com.bethwestsl.devistagram.databinding.FragmentDiscoverBinding
-import com.bethwestsl.devistagram.viewmodel.FeedViewModel
+import com.bethwestsl.devistagram.viewmodel.DiscoverViewModel
 
 class DiscoverFragment : Fragment() {
 
     private var _binding: FragmentDiscoverBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: FeedViewModel
+    private lateinit var viewModel: DiscoverViewModel
     private lateinit var adapter: DeviationGridAdapter
 
     override fun onCreateView(
@@ -79,7 +77,7 @@ class DiscoverFragment : Fragment() {
     }
 
     private fun setupViewModel() {
-        viewModel = ViewModelProvider(this)[FeedViewModel::class.java]
+        viewModel = ViewModelProvider(this)[DiscoverViewModel::class.java]
 
         viewModel.deviations.observe(viewLifecycleOwner) { deviations ->
             if (deviations != null) {
