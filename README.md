@@ -16,6 +16,17 @@ Devistagram is a native Android application that provides a streamlined, Instagr
 
 ---
 
+## 🎯 Key Features at a Glance
+
+- ⭐ **Favorite Artists** - Mark your favorite artists and view only their content
+- 🛡️ **Advanced Filtering** - Safe mode, artist blocking, and favorites-only feed
+- 🔔 **Organized Notifications** - Separate tabs for Comments, Feedback, and Mentions
+- 🖼️ **Multiple View Modes** - Grid and list layouts for different content types
+- 💾 **Persistent Settings** - All your preferences and favorites are saved
+- 🔐 **Secure OAuth** - Industry-standard authentication with encrypted token storage
+
+---
+
 ## ✨ Features
 
 ### 🎨 Content Browsing
@@ -108,6 +119,9 @@ app/src/main/java/com/bethwestsl/devistagram/
 │   ├── DiscoverFragment.kt
 │   ├── TaggedFragment.kt
 │   ├── NotificationsFragment.kt
+│   ├── CommentsNotificationsFragment.kt
+│   ├── FeedbackNotificationsFragment.kt
+│   ├── MentionsNotificationsFragment.kt
 │   ├── ProfileFragment.kt
 │   ├── SearchTagsFragment.kt
 │   └── SearchUsersFragment.kt
@@ -124,6 +138,7 @@ app/src/main/java/com/bethwestsl/devistagram/
 ├── MainActivity.kt
 ├── DeviationDetailActivity.kt
 ├── OtherUserProfileActivity.kt
+├── CollectionDetailActivity.kt
 ├── NotesActivity.kt
 └── NoteDetailActivity.kt
 ```
@@ -214,12 +229,42 @@ Additional documentation files:
 - `BUILD_INSTRUCTIONS.md` - Detailed build setup
 - `QUICK_START.md` - Quick start guide
 - Implementation docs for specific features:
-  - `FEED_IMPLEMENTATION.md`
-  - `COMMENTS_IMPLEMENTATION.md`
-  - `NOTIFICATIONS_TAB_REFACTOR.md`
-  - `ARTIST_FILTER_FEATURE.md`
-  - `SAFE_MODE_FEATURE.md`
+  - `FEED_IMPLEMENTATION.md` - Feed functionality
+  - `COMMENTS_IMPLEMENTATION.md` - Comments system
+  - `NOTIFICATIONS_TAB_REFACTOR.md` - Notifications organization
+  - `ARTIST_FILTER_FEATURE.md` - Blocking and filtering artists
+  - `SAFE_MODE_FEATURE.md` - Safe mode content filtering
+  - `FAVORITES_FILTER_FIX.md` - Favorites-only feed implementation
   - And more...
+
+---
+
+## 🌟 Using Favorites & Blocking
+
+### How to Favorite an Artist
+1. Navigate to any user's profile (tap their name anywhere in the app)
+2. Look for the **star icon (⭐)** in the top-right corner of the toolbar
+3. Tap the star to favorite/unfavorite the artist
+   - **Filled star** = Artist is favorited
+   - **Outlined star** = Artist is not favorited
+4. Favorited artists are saved automatically
+
+### How to View Favorites-Only Feed
+1. Go to the **Feed** tab
+2. Toggle the **"Show Favorites Only"** switch at the top
+3. The feed will refresh and show only content from your favorited artists (4 latest deviations per artist)
+4. This setting persists - it will stay enabled even after closing the app
+
+### How to Block an Artist
+1. Navigate to the artist's profile you want to block
+2. Tap the **menu** (three dots) or **block option**
+3. Confirm the block action
+4. Blocked artists' content will no longer appear in any feed
+
+### Filter Features
+- **Safe Mode**: Toggle on to hide all mature/adult content
+- **Favorites Filter**: When enabled, ONLY favorited artists' content is shown
+- **Pagination**: Automatically disabled when viewing favorites-only feed (shows all content at once)
 
 ---
 
@@ -232,6 +277,13 @@ Additional documentation files:
 ### Content Display
 - **Images not loading?** - Check internet connection and API rate limits
 - **Empty feed?** - Make sure you're watching artists on DeviantArt
+- **Favorites feed empty?** - You need to favorite at least one artist using the ⭐ icon on their profile
+- **Still seeing blocked content?** - Try refreshing the feed (pull down to refresh)
+
+### Filters
+- **Safe Mode not working?** - Toggle it off and on again, then refresh the feed
+- **Favorites filter showing wrong content?** - Make sure the toggle is ON and you have favorited artists
+- **Star icon not visible on profile?** - The star is in the top-right corner of the toolbar (you may need to clean build the app)
 
 ### Notifications
 - **No unread badges?** - This is a limitation of the DeviantArt API (read counts not provided)
