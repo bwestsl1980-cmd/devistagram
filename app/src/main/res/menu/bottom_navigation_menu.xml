@@ -7,14 +7,14 @@
     
     <item
         android:id="@+id/navigation_discover"
-        android:icon="@android:drawable/ic_menu_search"
+        android:icon="@android:drawable/ic_menu_gallery"
         android:title="Discover" />
     
     <item
         android:id="@+id/navigation_tagged"
-        android:icon="@android:drawable/ic_menu_gallery"
-        android:title="Tags" />
-    
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="Search" />
+
     <item
         android:id="@+id/navigation_notifications"
         android:icon="@android:drawable/ic_popup_reminder"

@@ -13,4 +13,5 @@
     <color name="border">#DBDBDB</color>
     <color name="divider">#DBDBDB</color>
     <color name="error">#ED4956</color>
+    <color name="link_color">#0095F6</color>
 </resources>

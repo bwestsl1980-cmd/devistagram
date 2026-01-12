@@ -24,4 +24,7 @@
     <!-- Status / error -->
     <color name="error">#ED4956</color>
 
+    <!-- Links -->
+    <color name="link_color">#3897F0</color>
+
 </resources>

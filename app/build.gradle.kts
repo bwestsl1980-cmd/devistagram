@@ -1,26 +1,42 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
 
+// Load local.properties
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(FileInputStream(localPropertiesFile))
+    }
+}
+
 android {
-    namespace = "com.scottapps.devistagram"
+    namespace = "com.bethwestsl.devistagram"
     compileSdk {
         version = release(36)
     }
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 
     defaultConfig {
-        applicationId = "com.scottapps.devistagram"
+        applicationId = "com.bethwestsl.devistagram"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Add BuildConfig fields for DeviantArt credentials
+        buildConfigField("String", "DEVIANTART_CLIENT_ID", "\"${localProperties.getProperty("DEVIANTART_CLIENT_ID", "")}\"")
+        buildConfigField("String", "DEVIANTART_CLIENT_SECRET", "\"${localProperties.getProperty("DEVIANTART_CLIENT_SECRET", "")}\"")
     }
 
     buildTypes {
@@ -78,6 +94,9 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     
+    // ViewPager2 for tabs
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

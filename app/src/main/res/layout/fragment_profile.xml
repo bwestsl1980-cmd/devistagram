@@ -250,7 +250,7 @@
 
             </com.google.android.material.tabs.TabLayout>
 
-            <!-- Gallery Folders Spinner (only visible when Galleries tab selected) -->
+            <!-- Gallery Folders Spinner (visible on all tabs) -->
             <Spinner
                 android:id="@+id/galleryFoldersSpinner"
                 android:layout_width="0dp"

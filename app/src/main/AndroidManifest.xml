@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="com.scottapps.devistagram"
+                    android:scheme="com.bethwestsl.devistagram"
                     android:host="oauth2callback" />
             </intent-filter>
         </activity>
@@ -44,6 +44,24 @@
         <!-- Deviation Detail Activity -->
         <activity
             android:name=".DeviationDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Devistagram" />
+
+        <!-- Other User Profile Activity -->
+        <activity
+            android:name=".OtherUserProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Devistagram" />
+
+        <!-- Notes Activity -->
+        <activity
+            android:name=".NotesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Devistagram" />
+
+        <!-- Note Detail Activity -->
+        <activity
+            android:name=".NoteDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Devistagram" />
     </application>
