@@ -238,14 +238,6 @@ class ProfileFragment : Fragment() {
                     androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(newMode)
                     true
                 }
-                R.id.action_edit_profile -> {
-                    Toast.makeText(requireContext(), "Edit Profile - Coming Soon", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                R.id.action_share_profile -> {
-                    Toast.makeText(requireContext(), "Share Profile - Coming Soon", Toast.LENGTH_SHORT).show()
-                    true
-                }
                 R.id.action_logout -> {
                     showLogoutConfirmation()
                     true

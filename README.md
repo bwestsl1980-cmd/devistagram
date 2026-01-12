@@ -1,138 +1,251 @@
-# Devistagram - OAuth Implementation
+# Devistagram
+
+<p align="center">
+  <strong>A modern, clean DeviantArt image viewer for Android</strong>
+</p>
 
 ## Overview
-This is the initial OAuth 2.0 authentication implementation for the Devistagram app - a DeviantArt content viewer for Android.
 
-## What's Implemented
+Devistagram is a native Android application that provides a streamlined, Instagram-like interface for browsing DeviantArt artwork. Built with Kotlin, it focuses on delivering an optimized image viewing experience with robust filtering and organization features.
 
-### OAuth 2.0 Flow
-- **Authorization Code Grant** - Full OAuth flow with refresh tokens
-- **Custom Tab Integration** - Opens DeviantArt authorization in an in-app browser
-- **Secure Token Storage** - Uses EncryptedSharedPreferences for storing access/refresh tokens
-- **Automatic Token Expiry** - Tracks token expiration and handles refresh
-
-### Features
-✅ Login with DeviantArt  
-✅ Secure token storage  
-✅ OAuth callback handling  
-✅ Token refresh capability  
-✅ Logout functionality  
-✅ Session persistence  
-
-## Project Structure
-
-```
-app/src/main/java/com/scottapps/devistagram/
-├── auth/
-│   ├── DeviantArtAuthConfig.kt    # OAuth configuration
-│   ├── OAuthManager.kt             # Handles OAuth flow
-│   └── TokenManager.kt             # Secure token storage
-├── model/
-│   └── TokenResponse.kt            # API response models
-├── network/
-│   ├── DeviantArtAuthApi.kt        # Retrofit API interface
-│   └── RetrofitClient.kt           # HTTP client setup
-├── LoginActivity.kt                # Login screen
-└── MainActivity.kt                 # Main app (placeholder)
-```
-
-## How It Works
-
-### 1. User clicks "Login with DeviantArt"
-- App generates a unique state parameter for CSRF protection
-- Opens DeviantArt authorization URL in Chrome Custom Tab
-- User logs in and authorizes the app
-
-### 2. DeviantArt redirects back to app
-- Redirect URI: `com.scottapps.devistagram://oauth2callback`
-- App receives authorization code and state
-- State is verified to prevent CSRF attacks
-
-### 3. Exchange code for tokens
-- App sends authorization code to DeviantArt's token endpoint
-- Receives:
-  - Access token (expires in 1 hour)
-  - Refresh token (expires in 3 months)
-- Tokens are encrypted and stored securely
-
-### 4. Session management
-- On app restart, checks if access token exists and isn't expired
-- If expired, can use refresh token to get new access token
-- If no valid token, redirects to login
-
-## API Configuration
-
-**DeviantArt Credentials:**
-- Client ID: `59601`
-- Client Secret: `ccd16fd197588957c0bd74939057fa9d`
-- Redirect URI: `com.scottapps.devistagram://oauth2callback`
-- Scope: `browse` (basic public access)
-
-**Endpoints:**
-- Authorization: `https://www.deviantart.com/oauth2/authorize`
-- Token: `https://www.deviantart.com/oauth2/token`
-
-## How to Test
-
-1. **Build and install** the app on your device/emulator
-2. **Click "Login with DeviantArt"**
-3. **Authorize** the app in the browser
-4. **You'll be redirected back** to the app
-5. **Success!** You should see "You're logged in!"
-
-## Next Steps
-
-- [ ] Implement DeviantArt API calls (browse deviations, user profile, etc.)
-- [ ] Add proper UI for viewing content
-- [ ] Implement image loading and caching
-- [ ] Add search functionality
-- [ ] Add favorites/collections
-- [ ] Improve error handling and user feedback
-
-## Dependencies
-
-```kotlin
-// Networking
-implementation("com.squareup.retrofit2:retrofit:2.9.0")
-implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-implementation("com.squareup.okhttp3:okhttp:4.12.0")
-
-// Coroutines
-implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
-// Security
-implementation("androidx.security:security-crypto:1.1.0-alpha06")
-
-// Browser
-implementation("androidx.browser:browser:1.7.0")
-```
-
-## Security Notes
-
-- Tokens are encrypted using AES256_GCM encryption
-- Client secret is included in app (note: this is normal for mobile apps, but keep the APK secure)
-- State parameter prevents CSRF attacks
-- HTTPS is used for all network communication
-
-## Troubleshooting
-
-**Login button does nothing:**
-- Check logcat for errors
-- Ensure internet permission is granted
-- Verify redirect URI matches DeviantArt app settings
-
-**Redirect doesn't work:**
-- Check AndroidManifest.xml has correct intent filter
-- Verify redirect URI: `com.scottapps.devistagram://oauth2callback`
-- Ensure activity has `launchMode="singleTask"`
-
-**Token exchange fails:**
-- Check Client ID and Secret are correct
-- Verify network connectivity
-- Check logcat for API error responses
+**Package Name:** `com.bethwestsl.devistagram`  
+**Author:** Beth West  
+**Status:** Ready for Test  
+**Minimum Android Version:** 7.0 (API 24)  
+**Target Android Version:** 14 (API 36)
 
 ---
 
-**Author:** Scott McGinn  
-**Date:** January 2026  
-**Status:** MVP OAuth Implementation Complete ✅
+## ✨ Features
+
+### 🎨 Content Browsing
+- **Feed Tab** - Browse your personalized DeviantArt feed with images from watched artists
+- **Discover Tab** - Explore popular and trending artwork
+- **Tagged Tab** - View deviations where you've been tagged
+- **Search by Tag** - Find artwork by specific tags
+- **Search by User** - Search and browse other users' profiles
+
+### 👤 Profile & User Management
+- **User Profile** - View your own profile with statistics and galleries
+- **Other User Profiles** - Browse other users' profiles, galleries, and collections
+- **Watch/Unwatch Users** - Follow and unfollow artists
+- **Gallery Browsing** - View user galleries with folder organization
+- **Collections** - Browse and organize your favorite collections
+
+### 🖼️ Image Viewing
+- **Full-Screen Deviation Detail** - Tap any image to view in full screen with zoom support
+- **Image Zoom** - Pinch-to-zoom on full-resolution images
+- **Metadata Display** - View titles, descriptions, artists, and statistics
+- **Download Images** - Save deviations to your device
+
+### 💬 Social Features
+- **Comments** - View and post comments on deviations
+- **Favorites** - Add/remove deviations from your favorites
+- **Comment Notifications** - Get notified of new comments on your deviations
+- **Feedback Notifications** - Receive feedback and critique notifications
+- **Mentions Notifications** - See when you're mentioned in comments
+
+### 📬 Messaging (Legacy)
+- **Notes/Mail** - View and read DeviantArt notes (deprecated by DeviantArt, but still accessible)
+- **Note Detail View** - Read full note conversations
+- **⚠️ Note:** DeviantArt has deprecated the Notes feature in favor of their Chat system
+
+### 🛡️ Content Filtering
+- **Safe Mode** - Filter out mature/adult content
+- **Artist Filter** - Block specific artists from appearing in your feed
+- **Custom Artist Blocklist** - Manage a personal list of blocked artists
+
+### ⚙️ Additional Features
+- **OAuth 2.0 Authentication** - Secure login with DeviantArt
+- **Dark/Light Theme** - System-responsive theme support
+- **Persistent Session** - Stay logged in across app restarts
+- **Pull-to-Refresh** - Refresh content on all tabs
+- **Infinite Scroll** - Seamless content loading
+- **Default Gallery Selection** - Set preferred gallery for profile view
+
+---
+
+## 🚫 Known Limitations
+
+### Content Type Restrictions
+This app is designed as an **image viewer only**. The following content types are **not supported**:
+- ❌ **Blogs** - Not displayed
+- ❌ **Stories** - Not displayed
+- ❌ **Journals** - Not displayed
+- ❌ **Literature** - Not displayed
+- ❌ **Videos** - Not displayed
+
+### API Limitations
+- ❌ **No Unread Notification Badges** - The DeviantArt API does not provide unread counts, so notifications cannot show badge indicators
+- ❌ **No Chat Support** - Chat feature is not available (DeviantArt's newer messaging system is not supported by their public API)
+
+---
+
+## 🏗️ Project Structure
+
+```
+app/src/main/java/com/bethwestsl/devistagram/
+├── adapter/              # RecyclerView adapters
+├── auth/                 # OAuth authentication
+│   ├── DeviantArtAuthConfig.kt
+│   ├── OAuthManager.kt
+│   └── TokenManager.kt
+├── fragment/             # Main app fragments
+│   ├── FeedFragment.kt
+│   ├── DiscoverFragment.kt
+│   ├── TaggedFragment.kt
+│   ├── NotificationsFragment.kt
+│   ├── ProfileFragment.kt
+│   ├── SearchTagsFragment.kt
+│   └── SearchUsersFragment.kt
+├── model/                # Data models
+├── network/              # Retrofit API interfaces
+│   ├── DeviantArtApi.kt
+│   ├── DeviantArtAuthApi.kt
+│   └── RetrofitClient.kt
+├── repository/           # Data repositories
+├── util/                 # Utility classes
+│   └── ArtistFilterManager.kt
+├── viewmodel/            # MVVM ViewModels
+├── LoginActivity.kt
+├── MainActivity.kt
+├── DeviationDetailActivity.kt
+├── OtherUserProfileActivity.kt
+├── NotesActivity.kt
+└── NoteDetailActivity.kt
+```
+
+---
+
+## 🔐 Security & Configuration
+
+### Secure Credentials
+OAuth credentials are stored securely in `local.properties` (not committed to version control):
+- Client ID and Secret are read at build time via BuildConfig
+- See `CREDENTIALS_SETUP.md` for setup instructions
+
+### Authentication
+- **OAuth 2.0** with authorization code grant flow
+- **Encrypted token storage** using Android EncryptedSharedPreferences
+- **Automatic token refresh** when access tokens expire
+- **Secure redirect URI:** `com.bethwestsl.devistagram://oauth2callback`
+
+### Scopes Requested
+- `browse` - Browse public content
+- `message` - Access notes/messages
+- `note` - Read and send notes
+- `user` - Access user profile
+- `collection` - Manage collections
+- `comment.post` - Post comments
+- `user.manage` - Watch/unwatch users
+
+---
+
+## 🛠️ Technology Stack
+
+### Core
+- **Language:** Kotlin
+- **Architecture:** MVVM (Model-View-ViewModel)
+- **Min SDK:** 24 (Android 7.0)
+- **Target SDK:** 36 (Android 14)
+
+### Key Libraries
+- **Retrofit 2.9.0** - HTTP client for API calls
+- **Gson** - JSON serialization
+- **OkHttp 4.12.0** - HTTP networking
+- **Kotlin Coroutines 1.7.3** - Asynchronous operations
+- **AndroidX Lifecycle** - ViewModel and LiveData
+- **Material Design 3** - Modern UI components
+- **Coil 2.5.0** - Image loading and caching
+- **PhotoView 2.3.0** - Image zoom functionality
+- **Chrome Custom Tabs** - OAuth browser integration
+- **Security Crypto** - Encrypted SharedPreferences
+
+---
+
+## 📱 Installation & Setup
+
+### Prerequisites
+1. Android Studio (latest version recommended)
+2. Android SDK with API 24-36
+3. DeviantArt Developer Account
+
+### Build Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/bwestsl1980-cmd/devistagram.git
+   ```
+
+2. Set up credentials in `local.properties`:
+   ```properties
+   DEVIANTART_CLIENT_ID=your_client_id
+   DEVIANTART_CLIENT_SECRET=your_client_secret
+   ```
+
+3. Configure your DeviantArt OAuth app:
+   - Redirect URI: `com.bethwestsl.devistagram://oauth2callback`
+   - Grant type: Authorization Code
+
+4. Sync Gradle and build the project
+
+5. Run on device or emulator
+
+For detailed setup instructions, see `BUILD_INSTRUCTIONS.md` and `CREDENTIALS_SETUP.md`.
+
+---
+
+## 📚 Documentation
+
+Additional documentation files:
+- `CREDENTIALS_SETUP.md` - How credentials are securely stored
+- `BUILD_INSTRUCTIONS.md` - Detailed build setup
+- `QUICK_START.md` - Quick start guide
+- Implementation docs for specific features:
+  - `FEED_IMPLEMENTATION.md`
+  - `COMMENTS_IMPLEMENTATION.md`
+  - `NOTIFICATIONS_TAB_REFACTOR.md`
+  - `ARTIST_FILTER_FEATURE.md`
+  - `SAFE_MODE_FEATURE.md`
+  - And more...
+
+---
+
+## 🐛 Known Issues & Troubleshooting
+
+### Authentication Issues
+- **Login redirects to wrong account?** - Clear app data and re-login
+- **OAuth fails?** - Verify redirect URI matches exactly in DeviantArt app settings
+
+### Content Display
+- **Images not loading?** - Check internet connection and API rate limits
+- **Empty feed?** - Make sure you're watching artists on DeviantArt
+
+### Notifications
+- **No unread badges?** - This is a limitation of the DeviantArt API (read counts not provided)
+
+---
+
+## 🤝 Contributing
+
+This is a personal project in testing phase. Bug reports and suggestions are welcome!
+
+---
+
+## 📄 License
+
+**Note:** This is an independent client and is not officially affiliated with or endorsed by DeviantArt.
+
+---
+
+## 🙏 Acknowledgments
+
+- **DeviantArt** for providing the public API
+- **PhotoView** library by Chris Banes
+- **Coil** image loading library
+- All open-source contributors whose libraries made this possible
+
+---
+
+**Last Updated:** January 12, 2026  
+**Version:** 1.0  
+**Ready for Test** ✅
