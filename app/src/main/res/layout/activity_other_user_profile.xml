@@ -31,7 +31,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Add to favorites"
             android:padding="12dp"
-            android:src="@drawable/ic_star_border" />
+            android:src="@drawable/ic_star_border"
+            app:tint="@color/text_primary" />
 
     </com.google.android.material.appbar.MaterialToolbar>
 

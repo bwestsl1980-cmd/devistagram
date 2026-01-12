@@ -120,6 +120,14 @@ class OtherUserProfileActivity : AppCompatActivity() {
                 } else {
                     binding.taglineTextView.visibility = View.GONE
                 }
+
+                // Show and update favorite button
+                currentUsername?.let { username ->
+                    android.util.Log.d("OtherUserProfile", "Profile loaded, updating favorite button")
+                    val isFavorite = filterManager.isFavorite(username)
+                    android.util.Log.d("OtherUserProfile", "Is favorited: $isFavorite")
+                    updateFavoriteButton(isFavorite)
+                }
             }
         }
 
@@ -203,17 +211,8 @@ class OtherUserProfileActivity : AppCompatActivity() {
 
         // Observe watch status
         viewModel.isWatching.observe(this) { isWatching ->
+            android.util.Log.d("OtherUserProfile", "Watch status changed: $isWatching for user: $currentUsername")
             updateWatchButton(isWatching)
-
-            // Show favorite button only if watching this user
-            if (isWatching) {
-                binding.favoriteButton.visibility = View.VISIBLE
-                currentUsername?.let { username ->
-                    updateFavoriteButton(filterManager.isFavorite(username))
-                }
-            } else {
-                binding.favoriteButton.visibility = View.GONE
-            }
         }
     }
 
@@ -224,8 +223,6 @@ class OtherUserProfileActivity : AppCompatActivity() {
     }
 
     private fun setupFavoriteButton() {
-        // Initially hide the favorite button (will be shown if user is watching)
-        binding.favoriteButton.visibility = View.GONE
 
         binding.favoriteButton.setOnClickListener {
             currentUsername?.let { username ->

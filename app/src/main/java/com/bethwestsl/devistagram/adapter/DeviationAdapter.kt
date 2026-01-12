@@ -1,6 +1,7 @@
 package com.bethwestsl.devistagram.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -12,10 +13,7 @@ import com.bethwestsl.devistagram.model.Deviation
 
 class DeviationAdapter(
     private val onDeviationClick: (Deviation) -> Unit,
-    private val onFavoriteClick: (Deviation) -> Unit,
-    private val onBlockClick: (Deviation) -> Unit,
-    private val isFavorite: (String) -> Boolean,
-    private val isBlocked: (String) -> Boolean
+    private val onAuthorClick: ((String) -> Unit)? = null
 ) : ListAdapter<Deviation, DeviationAdapter.DeviationViewHolder>(DeviationDiffCallback()) {
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviationViewHolder {
@@ -24,7 +22,7 @@ class DeviationAdapter(
             parent,
             false
         )
-        return DeviationViewHolder(binding, onDeviationClick, onFavoriteClick, onBlockClick, isFavorite, isBlocked)
+        return DeviationViewHolder(binding, onDeviationClick, onAuthorClick)
     }
     
     override fun onBindViewHolder(holder: DeviationViewHolder, position: Int) {
@@ -37,10 +35,7 @@ class DeviationAdapter(
     class DeviationViewHolder(
         private val binding: ItemDeviationBinding,
         private val onDeviationClick: (Deviation) -> Unit,
-        private val onFavoriteClick: (Deviation) -> Unit,
-        private val onBlockClick: (Deviation) -> Unit,
-        private val isFavorite: (String) -> Boolean,
-        private val isBlocked: (String) -> Boolean
+        private val onAuthorClick: ((String) -> Unit)?
     ) : RecyclerView.ViewHolder(binding.root) {
         
         fun bind(deviation: Deviation) {
@@ -56,6 +51,13 @@ class DeviationAdapter(
                     error(android.R.drawable.ic_menu_gallery)
                 }
                 
+                // Make author name and avatar clickable
+                val authorClickListener = View.OnClickListener {
+                    onAuthorClick?.invoke(username)
+                }
+                authorNameTextView.setOnClickListener(authorClickListener)
+                authorAvatarImageView.setOnClickListener(authorClickListener)
+
                 // Deviation image - use content if available, otherwise preview
                 val imageUrl = deviation.content?.src 
                     ?: deviation.preview?.src 
@@ -80,20 +82,6 @@ class DeviationAdapter(
                     commentsTextView.text = "💬 0"
                 }
                 
-                // Filter buttons
-                updateFavoriteButton(username)
-                updateBlockButton(username)
-                
-                favoriteButton.setOnClickListener {
-                    onFavoriteClick(deviation)
-                    updateFavoriteButton(username)
-                }
-                
-                blockButton.setOnClickListener {
-                    onBlockClick(deviation)
-                    updateBlockButton(username)
-                }
-                
                 // Click listener
                 root.setOnClickListener {
                     onDeviationClick(deviation)
@@ -101,28 +89,7 @@ class DeviationAdapter(
             }
         }
         
-        private fun updateFavoriteButton(username: String) {
-            binding.favoriteButton.apply {
-                if (isFavorite(username)) {
-                    text = "⭐" // Filled star emoji (same, just ensure it shows)
-                    alpha = 1.0f // Full opacity
-                } else {
-                    text = "☆" // Hollow star emoji
-                    alpha = 0.5f // Semi-transparent when not favorited
-                }
-            }
-        }
-        
-        private fun updateBlockButton(username: String) {
-            binding.blockButton.apply {
-                if (isBlocked(username)) {
-                    alpha = 1.0f // Full opacity when blocked
-                } else {
-                    alpha = 0.5f // Semi-transparent when not blocked
-                }
-            }
-        }
-        
+
         private fun formatCount(count: Int): String {
             return when {
                 count >= 1000000 -> String.format("%.1fM", count / 1000000.0)

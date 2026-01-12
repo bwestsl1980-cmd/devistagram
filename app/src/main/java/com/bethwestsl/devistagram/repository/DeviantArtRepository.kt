@@ -126,4 +126,75 @@ class DeviantArtRepository(context: Context) {
             Result.failure(e)
         }
     }
+
+    /**
+     * Fetches a feed of deviations from favorited users.
+     * For each favorited username:
+     * 1. Gets their profile
+     * 2. Gets their gallery folders
+     * 3. Fetches the 4 most recent deviations from their main gallery
+     * 4. Combines and sorts all deviations by timestamp
+     */
+    suspend fun getFavoritesFeed(
+        favoriteUsernames: Set<String>
+    ): Result<List<Deviation>> = withContext(Dispatchers.IO) {
+        try {
+            val accessToken = tokenManager.getAccessToken()
+                ?: return@withContext Result.failure(Exception("Not logged in"))
+
+            if (favoriteUsernames.isEmpty()) {
+                return@withContext Result.success(emptyList())
+            }
+
+            Log.d("DeviantArtRepo", "Fetching feed for ${favoriteUsernames.size} favorited users")
+
+            val allDeviations = mutableListOf<Deviation>()
+
+            // Fetch deviations for each favorited user
+            favoriteUsernames.forEach { username ->
+                try {
+                    Log.d("DeviantArtRepo", "Fetching gallery for: $username")
+
+                    // Use getUserGallery to get the latest deviations (limit 4)
+                    val galleryResponse = api.getUserGallery(
+                        authorization = "Bearer $accessToken",
+                        username = username,
+                        offset = null,
+                        limit = 4,
+                        matureContent = true
+                    )
+
+                    if (galleryResponse.isSuccessful && galleryResponse.body() != null) {
+                        val deviations = galleryResponse.body()!!.results
+                            ?.filter { deviation ->
+                                deviation.content?.src != null ||
+                                deviation.preview?.src != null ||
+                                deviation.thumbs?.firstOrNull()?.src != null
+                            }
+                            ?: emptyList()
+
+                        allDeviations.addAll(deviations)
+                        Log.d("DeviantArtRepo", "Added ${deviations.size} deviations from $username")
+                    } else {
+                        Log.w("DeviantArtRepo", "Failed to fetch gallery for $username: ${galleryResponse.code()}")
+                    }
+                } catch (e: Exception) {
+                    Log.e("DeviantArtRepo", "Error fetching gallery for $username", e)
+                    // Continue with next user even if one fails
+                }
+            }
+
+            // Sort by published time (newest first)
+            val sortedDeviations = allDeviations.sortedByDescending { deviation ->
+                deviation.publishedTime ?: ""
+            }
+
+            Log.d("DeviantArtRepo", "Loaded ${sortedDeviations.size} total deviations from favorites")
+            Result.success(sortedDeviations)
+
+        } catch (e: Exception) {
+            Log.e("DeviantArtRepo", "Exception fetching favorites feed", e)
+            Result.failure(e)
+        }
+    }
 }

@@ -30,20 +30,31 @@ class FeedFragment : Fragment() {
     private lateinit var adapter: DeviationAdapter
     private lateinit var filterManager: ArtistFilterManager
     private var allDeviations: List<Deviation> = emptyList()
+    private var hasLoadedContent = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        android.util.Log.d("FeedFragment", "════════════════════════════════════")
+        android.util.Log.d("FeedFragment", "onCreateView - Fragment is being created")
+        android.util.Log.d("FeedFragment", "════════════════════════════════════")
         _binding = FragmentFeedBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        android.util.Log.d("FeedFragment", "onViewCreated - Starting setup")
 
         filterManager = ArtistFilterManager(requireContext())
+
+        // Check toggle state immediately
+        val toggleState = filterManager.isFavoritesFilterEnabled()
+        val favoriteCount = filterManager.getFavoriteArtists().size
+        android.util.Log.d("FeedFragment", "onViewCreated - Toggle state: $toggleState")
+        android.util.Log.d("FeedFragment", "onViewCreated - Favorites count: $favoriteCount")
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -54,10 +65,19 @@ class FeedFragment : Fragment() {
             windowInsets
         }
 
+        android.util.Log.d("FeedFragment", "onViewCreated - Setting up RecyclerView")
         setupRecyclerView()
+
+        android.util.Log.d("FeedFragment", "onViewCreated - Setting up ViewModel")
         setupViewModel()
+
+        android.util.Log.d("FeedFragment", "onViewCreated - Setting up SwipeRefresh")
         setupSwipeRefresh()
+
+        android.util.Log.d("FeedFragment", "onViewCreated - Setting up FilterToggle")
         setupFilterToggle()
+
+        android.util.Log.d("FeedFragment", "onViewCreated - Setup complete, hasLoadedContent: $hasLoadedContent")
     }
 
     private fun setupRecyclerView() {
@@ -65,28 +85,9 @@ class FeedFragment : Fragment() {
             onDeviationClick = { deviation ->
                 DeviationDetailActivity.start(requireContext(), deviation)
             },
-            onFavoriteClick = { deviation ->
-                val added = filterManager.toggleFavorite(deviation.author.username)
-                Toast.makeText(
-                    requireContext(),
-                    if (added) "Added ${deviation.author.username} to favorites"
-                    else "Removed ${deviation.author.username} from favorites",
-                    Toast.LENGTH_SHORT
-                ).show()
-                applyFilter()
-            },
-            onBlockClick = { deviation ->
-                val added = filterManager.toggleBlocked(deviation.author.username)
-                Toast.makeText(
-                    requireContext(),
-                    if (added) "Blocked ${deviation.author.username}"
-                    else "Unblocked ${deviation.author.username}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                applyFilter()
-            },
-            isFavorite = { username -> filterManager.isFavorite(username) },
-            isBlocked = { username -> filterManager.isBlocked(username) }
+            onAuthorClick = { username ->
+                com.bethwestsl.devistagram.OtherUserProfileActivity.start(requireContext(), username)
+            }
         )
 
         binding.recyclerView.apply {
@@ -112,19 +113,36 @@ class FeedFragment : Fragment() {
     }
 
     private fun setupViewModel() {
+        android.util.Log.d("FeedFragment", "setupViewModel - Creating/Getting ViewModel")
         viewModel = ViewModelProvider(this)[FeedViewModel::class.java]
 
-        // Set browse type to "deviantsyouwatch" for the feed
-        viewModel.setBrowseType("deviantsyouwatch")
+        // Clear any stale data from previous fragment instances
+        android.util.Log.d("FeedFragment", "setupViewModel - Clearing stale ViewModel data")
+        viewModel.clearData()
 
+        android.util.Log.d("FeedFragment", "setupViewModel - Setting up deviations observer")
         viewModel.deviations.observe(viewLifecycleOwner) { deviations ->
-            if (deviations != null) {
+            android.util.Log.d("FeedFragment", "────────────────────────────────────")
+            android.util.Log.d("FeedFragment", "OBSERVER FIRED: deviations changed")
+            android.util.Log.d("FeedFragment", "Received ${deviations?.size ?: 0} deviations")
+            android.util.Log.d("FeedFragment", "Current toggle state: ${filterManager.isFavoritesFilterEnabled()}")
+            android.util.Log.d("FeedFragment", "hasLoadedContent: $hasLoadedContent")
+
+            // ONLY process if we've explicitly loaded content
+            // This prevents stale ViewModel data from being displayed
+            if (deviations != null && hasLoadedContent) {
+                android.util.Log.d("FeedFragment", "→ Processing deviations (content was loaded)")
                 allDeviations = deviations
                 applyFilter()
+            } else if (deviations != null && !hasLoadedContent) {
+                android.util.Log.d("FeedFragment", "→ IGNORING deviations (content not loaded yet - stale data)")
             }
+            android.util.Log.d("FeedFragment", "────────────────────────────────────")
         }
 
+        android.util.Log.d("FeedFragment", "setupViewModel - Setting up loading observer")
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            android.util.Log.d("FeedFragment", "Loading state changed: $isLoading")
             binding.progressBar.visibility = if (isLoading && adapter.itemCount == 0) {
                 View.VISIBLE
             } else {
@@ -147,7 +165,7 @@ class FeedFragment : Fragment() {
 
     private fun setupSwipeRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
-            viewModel.loadDeviations(refresh = true)
+            loadContent()
         }
     }
 
@@ -158,7 +176,7 @@ class FeedFragment : Fragment() {
         
         binding.favoritesFilterSwitch.setOnCheckedChangeListener { _, isChecked ->
             filterManager.setFavoritesFilterEnabled(isChecked)
-            applyFilter()
+            loadContent()
         }
         
         binding.safeModeSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -167,48 +185,95 @@ class FeedFragment : Fragment() {
         }
     }
 
-    private fun applyFilter() {
-        val blockedArtists = filterManager.getBlockedArtists()
-        val favoriteArtists = filterManager.getFavoriteArtists()
+    private fun loadContent() {
         val showFavoritesOnly = filterManager.isFavoritesFilterEnabled()
+
+        android.util.Log.d("FeedFragment", "▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼")
+        android.util.Log.d("FeedFragment", "loadContent() CALLED")
+        android.util.Log.d("FeedFragment", "showFavoritesOnly: $showFavoritesOnly")
+        android.util.Log.d("FeedFragment", "Setting hasLoadedContent = true")
+        hasLoadedContent = true
+
+        if (showFavoritesOnly) {
+            android.util.Log.d("FeedFragment", "→ Path: FAVORITES FEED")
+
+            val favoriteUsernames = filterManager.getFavoriteArtists()
+            android.util.Log.d("FeedFragment", "→ Favorites count: ${favoriteUsernames.size}")
+            android.util.Log.d("FeedFragment", "→ Favorites list: $favoriteUsernames")
+
+            if (favoriteUsernames.isEmpty()) {
+                android.util.Log.d("FeedFragment", "→ No favorites - showing EMPTY STATE")
+                binding.recyclerView.visibility = View.GONE
+                binding.errorTextView.text = "No favorite artists yet. Visit a user's profile and tap ⭐ to add them to favorites!"
+                binding.errorTextView.visibility = View.VISIBLE
+                allDeviations = emptyList()
+                adapter.submitList(emptyList())
+                android.util.Log.d("FeedFragment", "→ Empty state displayed")
+            } else {
+                android.util.Log.d("FeedFragment", "→ Loading favorites feed from API for ${favoriteUsernames.size} users")
+                viewModel.loadFavoritesFeed(favoriteUsernames)
+            }
+        } else {
+            android.util.Log.d("FeedFragment", "→ Path: REGULAR FEED")
+            android.util.Log.d("FeedFragment", "→ Setting browse type: deviantsyouwatch")
+            viewModel.setBrowseType("deviantsyouwatch")
+            android.util.Log.d("FeedFragment", "→ Calling loadDeviations(refresh=true)")
+            viewModel.loadDeviations(refresh = true)
+        }
+        android.util.Log.d("FeedFragment", "▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲")
+    }
+
+    private fun applyFilter() {
         val safeModeEnabled = filterManager.isSafeModeEnabled()
         
+        android.util.Log.d("FeedFragment", "┌──────────────────────────────────┐")
+        android.util.Log.d("FeedFragment", "│ applyFilter() CALLED             │")
+        android.util.Log.d("FeedFragment", "│ Input deviations: ${allDeviations.size.toString().padEnd(14)}│")
+        android.util.Log.d("FeedFragment", "│ Safe mode: ${safeModeEnabled.toString().padEnd(20)}│")
+
+        // Only apply safe mode filter (favorites are now handled by loadContent)
         val filtered = allDeviations.filter { deviation ->
-            val username = deviation.author.username
-            
-            // Always hide blocked artists
-            if (blockedArtists.contains(username)) {
-                return@filter false
-            }
-            
             // If safe mode is on, hide mature content
             if (safeModeEnabled && deviation.isMature == true) {
                 return@filter false
             }
-            
-            // If favorites filter is on, only show favorites
-            if (showFavoritesOnly) {
-                return@filter favoriteArtists.contains(username)
-            }
-            
-            // Otherwise show all (except blocked and mature if safe mode)
             true
         }
-        
-        adapter.submitList(filtered)
-        
+
+        android.util.Log.d("FeedFragment", "│ Output deviations: ${filtered.size.toString().padEnd(14)}│")
+        android.util.Log.d("FeedFragment", "└──────────────────────────────────┘")
+
+        adapter.submitList(filtered.toList()) {
+            android.util.Log.d("FeedFragment", "List submitted to adapter - ${filtered.size} items")
+        }
+
         if (filtered.isNotEmpty()) {
             binding.recyclerView.visibility = View.VISIBLE
             binding.errorTextView.visibility = View.GONE
         } else {
-            val message = when {
-                showFavoritesOnly && favoriteArtists.isEmpty() -> "No favorite artists yet. Tap ⭐ on posts to add favorites!"
-                showFavoritesOnly -> "No posts from favorite artists"
-                else -> "No posts from artists you watch yet"
-            }
+            val message = "No posts available"
             binding.errorTextView.text = message
             binding.errorTextView.visibility = View.VISIBLE
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        android.util.Log.d("FeedFragment", "════════════════════════════════════")
+        android.util.Log.d("FeedFragment", "onResume - Fragment becoming visible")
+        android.util.Log.d("FeedFragment", "hasLoadedContent: $hasLoadedContent")
+        android.util.Log.d("FeedFragment", "Toggle state: ${filterManager.isFavoritesFilterEnabled()}")
+        android.util.Log.d("FeedFragment", "Favorites count: ${filterManager.getFavoriteArtists().size}")
+        android.util.Log.d("FeedFragment", "Current deviations count: ${allDeviations.size}")
+
+        // Load content when fragment becomes visible, but only once per instance
+        if (!hasLoadedContent) {
+            android.util.Log.d("FeedFragment", "onResume - Content NOT loaded yet, calling loadContent()")
+            loadContent()
+        } else {
+            android.util.Log.d("FeedFragment", "onResume - Content ALREADY loaded, skipping loadContent()")
+        }
+        android.util.Log.d("FeedFragment", "════════════════════════════════════")
     }
 
     override fun onDestroyView() {

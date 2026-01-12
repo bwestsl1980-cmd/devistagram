@@ -138,13 +138,22 @@ class OtherUserProfileViewModel(application: Application, private val username: 
 
     private fun checkWatchStatus() {
         viewModelScope.launch {
-            val accessToken = tokenManager.getAccessToken() ?: return@launch
+            val accessToken = tokenManager.getAccessToken()
+            android.util.Log.d("OtherUserProfileVM", "Checking watch status for $username, has token: ${accessToken != null}")
+
+            if (accessToken == null) {
+                android.util.Log.e("OtherUserProfileVM", "No access token available")
+                _isWatching.value = false
+                return@launch
+            }
 
             watchRepository.isWatchingUser(username, accessToken).fold(
                 onSuccess = { isWatching ->
+                    android.util.Log.d("OtherUserProfileVM", "Watch status result: $isWatching for $username")
                     _isWatching.value = isWatching
                 },
-                onFailure = {
+                onFailure = { exception ->
+                    android.util.Log.e("OtherUserProfileVM", "Failed to check watch status", exception)
                     _isWatching.value = false
                 }
             )

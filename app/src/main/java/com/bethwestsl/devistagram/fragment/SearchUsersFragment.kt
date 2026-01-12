@@ -42,14 +42,17 @@ class SearchUsersFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = UserSearchAdapter { user ->
-            // TODO: Navigate to user profile when profile activity is implemented
-            Toast.makeText(requireContext(), "View ${user.username}'s profile - Coming Soon", Toast.LENGTH_SHORT).show()
+            navigateToUserProfile(user.username)
         }
 
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = this@SearchUsersFragment.adapter
         }
+    }
+
+    private fun navigateToUserProfile(username: String) {
+        com.bethwestsl.devistagram.OtherUserProfileActivity.start(requireContext(), username)
     }
 
     private fun setupViewModel() {

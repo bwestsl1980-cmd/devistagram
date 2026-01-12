@@ -31,13 +31,16 @@ class ArtistFilterManager(context: Context) {
         return gson.fromJson(json, type) ?: emptySet()
     }
     
-    // Toggle favorite artist
+    // Toggle favorite artist (returns true if added, false if removed)
     fun toggleFavorite(username: String): Boolean {
         val favorites = getFavoriteArtists().toMutableSet()
+
         val added = if (favorites.contains(username)) {
+            // Remove from favorites
             favorites.remove(username)
             false
         } else {
+            // Add to favorites
             favorites.add(username)
             true
         }

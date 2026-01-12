@@ -222,6 +222,10 @@ class ProfileFragment : Fragment() {
                     NotesActivity.start(requireContext())
                     true
                 }
+                R.id.action_manage_favorites -> {
+                    showManageFavoritesDialog()
+                    true
+                }
                 R.id.action_theme_toggle -> {
                     // Toggle theme
                     val newMode = if (menuItem.isChecked) {
@@ -487,6 +491,51 @@ class ProfileFragment : Fragment() {
             count >= 1000 -> String.format("%.1fK", count / 1000.0)
             else -> count.toString()
         }
+    }
+
+    private fun showManageFavoritesDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_manage_favorites, null)
+        val recyclerView = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.favoritesRecyclerView)
+        val emptyStateText = dialogView.findViewById<android.widget.TextView>(R.id.emptyStateText)
+        val countText = dialogView.findViewById<android.widget.TextView>(R.id.favoritesCountText)
+
+        val filterManager = com.bethwestsl.devistagram.util.ArtistFilterManager(requireContext())
+        val favorites = filterManager.getFavoriteArtists().toMutableList().sorted()
+
+        // Update count (no limit)
+        countText.text = "${favorites.size} favourites"
+
+        if (favorites.isEmpty()) {
+            recyclerView.visibility = View.GONE
+            emptyStateText.visibility = View.VISIBLE
+        } else {
+            recyclerView.visibility = View.VISIBLE
+            emptyStateText.visibility = View.GONE
+        }
+
+        val adapter = com.bethwestsl.devistagram.adapter.FavoriteUsersAdapter { username ->
+            // Remove favorite
+            AlertDialog.Builder(requireContext())
+                .setTitle("Remove Favourite")
+                .setMessage("Remove $username from your favourites?")
+                .setPositiveButton("Remove") { _, _ ->
+                    filterManager.toggleFavorite(username)
+                    // Refresh the dialog
+                    showManageFavoritesDialog()
+                    android.widget.Toast.makeText(requireContext(), "Removed $username from favourites", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        recyclerView.adapter = adapter
+        adapter.submitList(favorites)
+
+        AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setPositiveButton("Close", null)
+            .show()
     }
 
     override fun onDestroyView() {

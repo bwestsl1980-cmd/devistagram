@@ -28,15 +28,17 @@ Devistagram is a native Android application that provides a streamlined, Instagr
 ### 👤 Profile & User Management
 - **User Profile** - View your own profile with statistics and galleries
 - **Other User Profiles** - Browse other users' profiles, galleries, and collections
-- **Watch/Unwatch Users** - Follow and unfollow artists
+- **Watch/Unwatch Users** - Follow and unfollow artists from their profile page
 - **Gallery Browsing** - View user galleries with folder organization
 - **Collections** - Browse and organize your favorite collections
+- **Collection Detail View** - View full collection contents in grid layout
 
 ### 🖼️ Image Viewing
 - **Full-Screen Deviation Detail** - Tap any image to view in full screen with zoom support
 - **Image Zoom** - Pinch-to-zoom on full-resolution images
 - **Metadata Display** - View titles, descriptions, artists, and statistics
 - **Download Images** - Save deviations to your device
+- **Grid & List Views** - Multiple viewing layouts for galleries and collections
 
 ### 💬 Social Features
 - **Comments** - View and post comments on deviations
@@ -44,24 +46,35 @@ Devistagram is a native Android application that provides a streamlined, Instagr
 - **Comment Notifications** - Get notified of new comments on your deviations
 - **Feedback Notifications** - Receive feedback and critique notifications
 - **Mentions Notifications** - See when you're mentioned in comments
+- **Organized Notification Tabs** - Separate tabs for Comments, Feedback, and Mentions
 
 ### 📬 Messaging (Legacy)
 - **Notes/Mail** - View and read DeviantArt notes (deprecated by DeviantArt, but still accessible)
 - **Note Detail View** - Read full note conversations
 - **⚠️ Note:** DeviantArt has deprecated the Notes feature in favor of their Chat system
 
+### ⭐ Favorites & Blocking System
+- **Favorite Artists** - Mark specific artists as favorites using the ⭐ icon on their profile
+- **Favorites-Only Feed** - Toggle "Show Favorites Only" to view content exclusively from favorited artists
+- **Artist Blocking** - Block specific artists to hide their content from your feed
+- **Persistent Filters** - All favorite and block settings are saved and persist across app restarts
+- **Visual Indicators** - Filled star (⭐) shows favorited artists, outlined star shows non-favorited
+
 ### 🛡️ Content Filtering
-- **Safe Mode** - Filter out mature/adult content
-- **Artist Filter** - Block specific artists from appearing in your feed
-- **Custom Artist Blocklist** - Manage a personal list of blocked artists
+- **Safe Mode** - Filter out mature/adult content from all feeds with toggle switch
+- **Favorites Filter** - Show only content from your favorited artists
+- **Artist Blocklist** - Blocked artists' content is automatically hidden from all feeds
+- **Smart Filtering** - Filters apply instantly without requiring page refresh
+- **Filter Persistence** - All filter settings are saved between sessions
 
 ### ⚙️ Additional Features
 - **OAuth 2.0 Authentication** - Secure login with DeviantArt
 - **Dark/Light Theme** - System-responsive theme support
 - **Persistent Session** - Stay logged in across app restarts
 - **Pull-to-Refresh** - Refresh content on all tabs
-- **Infinite Scroll** - Seamless content loading
+- **Infinite Scroll** - Seamless content loading (disabled when viewing favorites-only feed)
 - **Default Gallery Selection** - Set preferred gallery for profile view
+- **Optimized Pagination** - Smart content loading prevents duplicate data when scrolling
 
 ---
 
