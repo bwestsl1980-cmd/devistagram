@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.bethwestsl.devistagram.databinding.FragmentNotificationsBinding
+import com.bethwestsl.devistagram.R
 
 class NotificationsFragment : Fragment() {
 
@@ -46,11 +47,19 @@ class NotificationsFragment : Fragment() {
         binding.viewPager.adapter = adapter
 
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
-            tab.text = when (position) {
-                0 -> "Feedback"
-                1 -> "Comments"
-                2 -> "Mentions"
-                else -> ""
+            when (position) {
+                0 -> {
+                    tab.text = "Feedback"
+                    tab.setIcon(android.R.drawable.btn_star)
+                }
+                1 -> {
+                    tab.text = "Comments"
+                    tab.setIcon(android.R.drawable.ic_menu_send)
+                }
+                2 -> {
+                    tab.text = "Mentions"
+                    tab.setIcon(android.R.drawable.ic_menu_info_details)
+                }
             }
         }.attach()
     }

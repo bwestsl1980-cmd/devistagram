@@ -11,11 +11,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bethwestsl.devistagram.DeviationDetailActivity
 import com.bethwestsl.devistagram.R
 import com.bethwestsl.devistagram.adapter.DeviationAdapter
+import com.bethwestsl.devistagram.adapter.DeviationGridAdapter
 import com.bethwestsl.devistagram.databinding.FragmentFeedBinding
 import com.bethwestsl.devistagram.model.Deviation
 import com.bethwestsl.devistagram.util.ArtistFilterManager
@@ -28,6 +30,7 @@ class FeedFragment : Fragment() {
 
     private lateinit var viewModel: FeedViewModel
     private lateinit var adapter: DeviationAdapter
+    private lateinit var gridAdapter: DeviationGridAdapter
     private lateinit var filterManager: ArtistFilterManager
     private var allDeviations: List<Deviation> = emptyList()
     private var hasLoadedContent = false
@@ -77,6 +80,9 @@ class FeedFragment : Fragment() {
         android.util.Log.d("FeedFragment", "onViewCreated - Setting up FilterToggle")
         setupFilterToggle()
 
+        android.util.Log.d("FeedFragment", "onViewCreated - Setting up Tabs")
+        setupTabs()
+
         android.util.Log.d("FeedFragment", "onViewCreated - Setup complete, hasLoadedContent: $hasLoadedContent")
     }
 
@@ -90,6 +96,10 @@ class FeedFragment : Fragment() {
             }
         )
 
+        gridAdapter = DeviationGridAdapter { deviation ->
+            DeviationDetailActivity.start(requireContext(), deviation)
+        }
+
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = this@FeedFragment.adapter
@@ -98,10 +108,14 @@ class FeedFragment : Fragment() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
 
-                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                    val visibleItemCount = layoutManager.childCount
-                    val totalItemCount = layoutManager.itemCount
-                    val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+                    val layoutManager = recyclerView.layoutManager
+                    val visibleItemCount = layoutManager?.childCount ?: 0
+                    val totalItemCount = layoutManager?.itemCount ?: 0
+                    val firstVisibleItemPosition = when (layoutManager) {
+                        is LinearLayoutManager -> layoutManager.findFirstVisibleItemPosition()
+                        is GridLayoutManager -> layoutManager.findFirstVisibleItemPosition()
+                        else -> 0
+                    }
 
                     if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 5
                         && firstVisibleItemPosition >= 0) {
@@ -243,8 +257,21 @@ class FeedFragment : Fragment() {
         android.util.Log.d("FeedFragment", "│ Output deviations: ${filtered.size.toString().padEnd(14)}│")
         android.util.Log.d("FeedFragment", "└──────────────────────────────────┘")
 
-        adapter.submitList(filtered.toList()) {
-            android.util.Log.d("FeedFragment", "List submitted to adapter - ${filtered.size} items")
+        // Submit to the appropriate adapter based on selected tab
+        val selectedTab = binding.feedTabLayout.selectedTabPosition
+        when (selectedTab) {
+            0 -> {
+                // Feed view
+                adapter.submitList(filtered.toList()) {
+                    android.util.Log.d("FeedFragment", "List submitted to adapter - ${filtered.size} items")
+                }
+            }
+            1 -> {
+                // Tiled view
+                gridAdapter.submitList(filtered.toList()) {
+                    android.util.Log.d("FeedFragment", "List submitted to grid adapter - ${filtered.size} items")
+                }
+            }
         }
 
         if (filtered.isNotEmpty()) {
@@ -255,6 +282,56 @@ class FeedFragment : Fragment() {
             binding.errorTextView.text = message
             binding.errorTextView.visibility = View.VISIBLE
         }
+    }
+
+    private fun setupTabs() {
+        binding.feedTabLayout.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+                when (tab?.position) {
+                    0 -> switchToFeedView()
+                    1 -> switchToTiledView()
+                }
+            }
+
+            override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
+            override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
+        })
+    }
+
+    private fun switchToFeedView() {
+        android.util.Log.d("FeedFragment", "Switching to Feed view")
+
+        // Get current filtered deviations
+        val currentDeviations = adapter.currentList.ifEmpty {
+            gridAdapter.currentList
+        }
+
+        // Switch to LinearLayoutManager and regular adapter
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@FeedFragment.adapter
+        }
+
+        // Reapply current list to the adapter
+        adapter.submitList(currentDeviations.toList())
+    }
+
+    private fun switchToTiledView() {
+        android.util.Log.d("FeedFragment", "Switching to Tiled view")
+
+        // Get current filtered deviations
+        val currentDeviations = adapter.currentList.ifEmpty {
+            gridAdapter.currentList
+        }
+
+        // Switch to GridLayoutManager and grid adapter
+        binding.recyclerView.apply {
+            layoutManager = GridLayoutManager(requireContext(), 3)
+            adapter = this@FeedFragment.gridAdapter
+        }
+
+        // Reapply current list to the grid adapter
+        gridAdapter.submitList(currentDeviations.toList())
     }
 
     override fun onResume() {

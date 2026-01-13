@@ -41,6 +41,10 @@ class DeviantArtRepository(context: Context) {
                         deviation.preview?.src != null || 
                         deviation.thumbs?.firstOrNull()?.src != null
                     }
+                    ?.sortedByDescending { deviation ->
+                        // Sort by published time (newest first)
+                        deviation.publishedTime ?: ""
+                    }
                     ?: emptyList()
                 Log.d("DeviantArtRepo", "Loaded ${deviations.size} deviations")
                 Result.success(deviations)
@@ -81,6 +85,10 @@ class DeviantArtRepository(context: Context) {
                         deviation.content?.src != null || 
                         deviation.preview?.src != null || 
                         deviation.thumbs?.firstOrNull()?.src != null
+                    }
+                    ?.sortedByDescending { deviation ->
+                        // Sort by published time (newest first)
+                        deviation.publishedTime ?: ""
                     }
                     ?: emptyList()
                 Log.d("DeviantArtRepo", "Loaded ${deviations.size} deviations for tag: $tag")

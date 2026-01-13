@@ -386,6 +386,21 @@ class ProfileFragment : Fragment() {
 
         val prefs = requireContext().getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
 
+        // Load the saved default or use Featured (first gallery)
+        val savedGalleryId = prefs.getString("default_gallery_id", null)
+        var selectedIndex = 0
+        if (savedGalleryId != null) {
+            val index = galleryFolders.indexOfFirst { it.folderId == savedGalleryId }
+            if (index >= 0) {
+                selectedIndex = index
+            }
+        }
+
+        // Set the selection BEFORE setting the listener to avoid triggering onItemSelected during setup
+        if (galleryFolders.isNotEmpty()) {
+            binding.galleryFoldersSpinner.setSelection(selectedIndex, false)
+        }
+
         binding.galleryFoldersSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedFolder = galleryFolders[position]
@@ -406,19 +421,14 @@ class ProfileFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        // Load the saved default or use Featured (first gallery)
-        val savedGalleryId = prefs.getString("default_gallery_id", null)
-        var selectedIndex = 0
-        if (savedGalleryId != null) {
-            val index = galleryFolders.indexOfFirst { it.folderId == savedGalleryId }
-            if (index >= 0) {
-                selectedIndex = index
-            }
-        }
-
-        // Set the selection
+        // Now manually load the selected gallery after setting up the listener
         if (galleryFolders.isNotEmpty()) {
-            binding.galleryFoldersSpinner.setSelection(selectedIndex)
+            val selectedFolder = galleryFolders[selectedIndex]
+            currentUsername?.let { username ->
+                selectedFolder.folderId?.let { folderId ->
+                    viewModel.loadGalleryFolder(username, folderId)
+                }
+            }
         }
     }
 
